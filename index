@@ -843,7 +843,7 @@
     </style>
 </head>
 <body>
-<!-- Header -->
+    <!-- Header -->
     <div class="header">
         <div class="header-content">
             <div>
@@ -1225,7 +1225,7 @@
         };
 
         let currentLanguage = localStorage.getItem('language') || 'ja';
-// Daily limit system
+        // Daily limit system
         const DAILY_LIMIT = 5;
         const LIMIT_KEY = 'dailyAddLimit';
 
@@ -1775,7 +1775,7 @@
             selectedPhotos.splice(index, 1);
             renderPhotoPreview();
         }
-// Save Memo
+        // Save Memo
         function saveMemo(event) {
             event.preventDefault();
             console.log('saveMemo called');
