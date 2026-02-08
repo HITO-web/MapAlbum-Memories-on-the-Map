@@ -843,3 +843,1482 @@
     </style>
 </head>
 <body>
+<!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Map Album</h1>
+                <div class="header-subtitle">思い出を地図に刻む</div>
+            </div>
+            <button class="settings-btn" id="settingsBtn">⚙</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-button active" data-tab="list">リスト</button>
+            <button class="tab-button" data-tab="map">マップ</button>
+        </div>
+
+        <!-- List Tab -->
+        <div class="tab-content active" id="listTab">
+            <div class="memo-list" id="memoList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📍</div>
+                    <div class="empty-state-text" id="emptyStateText">まだメモがありません</div>
+                    <div class="empty-state-subtext" id="emptyStateSubtext">右下のボタンから思い出を追加しましょう</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Tab -->
+        <div class="tab-content" id="mapTab">
+            <div class="map-container">
+                <div id="viewMap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB Button -->
+    <button class="fab" id="addBtn">
+        +
+        <span class="fab-badge" id="fabBadge">5</span>
+    </button>
+
+    <!-- Memo Detail Modal -->
+    <div class="modal" id="memoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalLocation">場所名</h2>
+                <button class="close-btn" onclick="closeMemoModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <div class="detail-label" id="detailDateLabel">日時</div>
+                    <div class="detail-content" id="modalDate"></div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label" id="detailMemoLabel">メモ</div>
+                    <div class="detail-content" id="modalMemo"></div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label" id="detailPhotoLabel">写真</div>
+                    <div class="detail-photos" id="modalPhotos"></div>
+                </div>
+                <button class="btn-delete" onclick="deleteMemo()">削除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Photo Modal -->
+    <div class="modal" id="addPhotoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新しい思い出を追加</h2>
+                <button class="close-btn" onclick="closeAddModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="memoForm" onsubmit="saveMemo(event)">
+                    <div class="form-group">
+                        <label class="form-label" id="mapSelectLabel">地図をタップして場所を選択</label>
+                        <div class="map-instructions">
+                            地図上の好きな場所をタップしてマーカーを配置してください
+                        </div>
+                        <div class="map-container-add">
+                            <div id="addMap"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" id="locationNameFormLabel">場所の名前</label>
+                        <input type="text" class="form-input" id="locationName" placeholder="例: 東京タワー、お気に入りのカフェ">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" id="memoFormLabel">メモ</label>
+                        <textarea class="form-input" id="memoText" placeholder="この場所での思い出を書いてください..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" id="photoFormLabel">写真を追加</label>
+                        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📷</div>
+                            <div id="photoUploadText">タップして写真を選択</div>
+                            <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotoSelect(event)">
+                        </div>
+                        <div class="photo-preview-grid" id="photoPreview"></div>
+                    </div>
+
+                    <button type="submit" class="btn" id="saveButton">保存</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="settingsModalTitle">設定</h2>
+                <button class="close-btn" onclick="closeSettingsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsVersionTitle">バージョン</div>
+                    <div class="settings-value">v1.0.0</div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsNoticeTitle">お知らせ</div>
+                    <button class="btn" onclick="showNotice()" style="background: #0066cc; color: white;" id="settingsNoticeButton">
+                        お知らせを見る
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsLanguageTitle">言語 / Language</div>
+                    <select class="settings-select" id="languageSelect">
+                        <option value="ja">日本語</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsHowToTitle">このアプリの使い方</div>
+                    <div class="settings-text" id="settingsHowToText">
+                        1. 右下の「+」ボタンをタップ<br>
+                        2. 地図上で場所を選択<br>
+                        3. 写真とメモを追加<br>
+                        4. 保存して思い出を記録
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsPrivacyTitle">プライバシーポリシー</div>
+                    <button class="btn" onclick="showPrivacyPolicy()" style="background: #0066cc; color: white;" id="settingsPrivacyButton">
+                        プライバシーポリシーを見る
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsAboutTitle">このアプリについて</div>
+                    <button class="btn" onclick="showAbout()" style="background: #0066cc; color: white;" id="settingsAboutButton">
+                        このアプリについて見る
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsDataTitle">データ管理</div>
+                    <button class="btn btn-danger" id="exportDataButton" onclick="exportData()" style="margin-bottom: 0.5rem; background: #0066cc;">データをエクスポート</button>
+                    <button class="btn btn-danger" id="importDataButton" onclick="document.getElementById('importFileInput').click()" style="margin-bottom: 0.5rem; background: #0066cc;">データをインポート</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importData(event)">
+                    <button class="btn btn-danger" id="clearDataButton" onclick="clearAllData()" style="margin-bottom: 0.5rem;">すべてのデータを削除</button>
+                    <button class="btn btn-danger" id="resetDatabaseButton" onclick="resetDatabase()" style="background: #666;">データベースをリセット</button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsFeedbackTitle">フィードバック</div>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSe13BAEtXzH7X4yX1xajg7j7tXdkhsp-pf1ri2byigL1Oy97w/viewform" target="_blank" rel="noopener noreferrer" class="btn" style="display: block; text-align: center; background: #0066cc; color: white; text-decoration: none;" id="settingsFeedbackButton">
+                        フィードバックを送る
+                    </a>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-title" id="settingsLibrariesTitle">使用ライブラリ</div>
+                    <div class="library-item">
+                        <div class="library-name">Leaflet v1.9.4</div>
+                        <div class="library-license">BSD-2-Clause License</div>
+                    </div>
+                    <div class="library-item">
+                        <div class="library-name">heic2any v0.0.4</div>
+                        <div class="library-license">MIT License</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div class="modal" id="privacyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="privacyModalTitle">プライバシーポリシー</h2>
+                <button class="close-btn" onclick="closePrivacyModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-content" id="privacyContent">
+                    <!-- プライバシーポリシーの内容がここに表示されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notice Modal -->
+    <div class="modal" id="noticeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="noticeModalTitle">お知らせ</h2>
+                <button class="close-btn" onclick="closeNoticeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-content" id="noticeContent">
+                    <!-- お知らせの内容がここに表示されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="aboutModalTitle">このアプリについて</h2>
+                <button class="close-btn" onclick="closeAboutModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-content" id="aboutContent">
+                    <!-- このアプリについての内容がここに表示されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global error handler
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Global error:', message, 'at', source, lineno, colno, error);
+            return false;
+        };
+
+        window.onunhandledrejection = function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+        };
+
+        // Translations
+        const translations = {
+            ja: {
+                appTitle: 'Map Album',
+                appSubtitle: '思い出を地図に刻む',
+                tabList: 'リスト',
+                tabMap: 'マップ',
+                emptyStateText: 'まだメモがありません',
+                emptyStateSubtext: '右下のボタンから思い出を追加しましょう',
+                addPhotoTitle: '新しい思い出を追加',
+                mapInstruction: '地図上の好きな場所をタップしてマーカーを配置してください',
+                locationNameLabel: '場所の名前',
+                locationNamePlaceholder: '例: 東京タワー、お気に入りのカフェ',
+                memoLabel: 'メモ',
+                memoPlaceholder: 'この場所での思い出を書いてください...',
+                photoLabel: '写真を追加',
+                photoUploadText: 'タップして写真を選択',
+                saveBtn: '保存',
+                deleteBtn: '削除',
+                settingsTitle: '設定',
+                settingsModalTitle: '設定',
+                versionTitle: 'バージョン',
+                versionValue: 'v1.0.0',
+                noticeTitle: 'お知らせ',
+                noticeButton: 'お知らせを見る',
+                noticeModalTitle: 'お知らせ',
+                languageTitle: '言語 / Language',
+                howToTitle: 'このアプリの使い方',
+                howToText: '1. 右下の「+」ボタンをタップ<br>2. 地図上で場所を選択<br>3. 写真とメモを追加<br>4. 保存して思い出を記録',
+                privacyTitle: 'プライバシーポリシー',
+                privacyButton: 'プライバシーポリシーを見る',
+                privacyModalTitle: 'プライバシーポリシー',
+                aboutTitle: 'このアプリについて',
+                aboutButton: 'このアプリについて見る',
+                aboutModalTitle: 'このアプリについて',
+                aboutText: 'Map Albumは、あなたの思い出を写真と地図で記録するシンプルなアプリです。旅行の思い出や日常の特別な瞬間を、場所と一緒に保存できます。',
+                dataManagementTitle: 'データ管理',
+                feedbackTitle: 'フィードバック',
+                feedbackButton: 'フィードバックを送る',
+                clearDataBtn: 'すべてのデータを削除',
+                librariesTitle: '使用ライブラリ',
+                dateLabel: '日時',
+                photoLabel2: '写真',
+                detailBtn: '詳細を見る',
+                clearAllConfirm1: '本当にすべてのデータを削除しますか?',
+                clearAllConfirm2: 'この操作は取り消せません。本当に実行しますか?',
+                dataCleared: 'すべてのデータを削除しました',
+                deleteError: '削除に失敗しました',
+                photoCount: '枚の写真',
+                noPhotos: '写真なし',
+                selectLocation: '地図上で場所を選択してください',
+                saveFailed: '保存に失敗しました',
+                deleteConfirm: '本当に削除しますか?',
+                mapSelectLabel: '地図をタップして場所を選択',
+                resetDatabaseBtn: 'データベースをリセット',
+                dailyLimitReached: '本日の追加回数の上限（5回）に達しました。明日0時にリセットされます。',
+                remainingAdds: '残り追加回数',
+                exportData: 'データをエクスポート',
+                importData: 'データをインポート',
+                exportSuccess: 'データをエクスポートしました',
+                importSuccess: 'データをインポートしました',
+                importFailed: 'インポートに失敗しました',
+                importConfirm: '既存のデータは上書きされます。よろしいですか？'
+            },
+            en: {
+                appTitle: 'Map Album',
+                appSubtitle: 'Memories on the Map',
+                tabList: 'List',
+                tabMap: 'Map',
+                emptyStateText: 'No memos yet',
+                emptyStateSubtext: 'Tap the button below to add your memories',
+                addPhotoTitle: 'Add New Memory',
+                mapInstruction: 'Tap on the map to place a marker',
+                locationNameLabel: 'Location Name',
+                locationNamePlaceholder: 'e.g., Tokyo Tower, Favorite Cafe',
+                memoLabel: 'Memo',
+                memoPlaceholder: 'Write your memories about this place...',
+                photoLabel: 'Add Photos',
+                photoUploadText: 'Tap to select photos',
+                saveBtn: 'Save',
+                deleteBtn: 'Delete',
+                settingsTitle: 'Settings',
+                settingsModalTitle: 'Settings',
+                versionTitle: 'Version',
+                versionValue: 'v1.0.0',
+                noticeTitle: 'Notice',
+                noticeButton: 'View Notice',
+                noticeModalTitle: 'Notice',
+                languageTitle: 'Language / 言語',
+                howToTitle: 'How to Use',
+                howToText: '1. Tap the "+" button at bottom right<br>2. Select a location on the map<br>3. Add photos and memo<br>4. Save to record your memory',
+                privacyTitle: 'Privacy Policy',
+                privacyButton: 'View Privacy Policy',
+                privacyModalTitle: 'Privacy Policy',
+                aboutTitle: 'About This App',
+                aboutButton: 'View About This App',
+                aboutModalTitle: 'About This App',
+                aboutText: 'Map Album is a simple app to record your memories with photos and maps. Save your travel memories and special daily moments together with locations.',
+                dataManagementTitle: 'Data Management',
+                feedbackTitle: 'Feedback',
+                feedbackButton: 'Send Feedback',
+                clearDataBtn: 'Clear All Data',
+                librariesTitle: 'Libraries Used',
+                dateLabel: 'Date',
+                photoLabel2: 'Photos',
+                detailBtn: 'View Details',
+                clearAllConfirm1: 'Are you sure you want to delete all data?',
+                clearAllConfirm2: 'This action cannot be undone. Do you really want to proceed?',
+                dataCleared: 'All data has been cleared',
+                deleteError: 'Failed to delete',
+                photoCount: ' photos',
+                noPhotos: 'No photos',
+                selectLocation: 'Please select a location on the map',
+                saveFailed: 'Failed to save',
+                deleteConfirm: 'Are you sure you want to delete this?',
+                mapSelectLabel: 'Tap on the map to select location',
+                resetDatabaseBtn: 'Reset Database',
+                dailyLimitReached: 'Daily limit of 5 additions reached. Will reset at midnight.',
+                remainingAdds: 'Remaining adds',
+                exportData: 'Export Data',
+                importData: 'Import Data',
+                exportSuccess: 'Data exported successfully',
+                importSuccess: 'Data imported successfully',
+                importFailed: 'Failed to import data',
+                importConfirm: 'Existing data will be overwritten. Are you sure?'
+            }
+        };
+
+        let currentLanguage = localStorage.getItem('language') || 'ja';
+// Daily limit system
+        const DAILY_LIMIT = 5;
+        const LIMIT_KEY = 'dailyAddLimit';
+
+        function getDailyLimitData() {
+            const data = localStorage.getItem(LIMIT_KEY);
+            if (!data) {
+                return { count: 0, resetTime: getNextResetTime() };
+            }
+            return JSON.parse(data);
+        }
+
+        function getNextResetTime() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            return tomorrow.getTime();
+        }
+
+        function getRemainingCount() {
+            const data = getDailyLimitData();
+            const now = Date.now();
+            
+            if (now >= data.resetTime) {
+                const newData = { count: 0, resetTime: getNextResetTime() };
+                localStorage.setItem(LIMIT_KEY, JSON.stringify(newData));
+                return DAILY_LIMIT;
+            }
+            
+            return Math.max(0, DAILY_LIMIT - data.count);
+        }
+
+        function incrementAddCount() {
+            const data = getDailyLimitData();
+            const now = Date.now();
+            
+            if (now >= data.resetTime) {
+                data.count = 0;
+                data.resetTime = getNextResetTime();
+            }
+            
+            data.count += 1;
+            localStorage.setItem(LIMIT_KEY, JSON.stringify(data));
+            updateFabBadge();
+        }
+
+        function updateFabBadge() {
+            const remaining = getRemainingCount();
+            const badge = document.getElementById('fabBadge');
+            const fabBtn = document.getElementById('addBtn');
+            
+            if (badge) {
+                badge.textContent = remaining;
+                if (remaining === 0) {
+                    badge.classList.add('zero');
+                } else {
+                    badge.classList.remove('zero');
+                }
+            }
+            
+            if (fabBtn) {
+                if (remaining === 0) {
+                    fabBtn.classList.add('disabled');
+                } else {
+                    fabBtn.classList.remove('disabled');
+                }
+            }
+        }
+
+        function canAddMemo() {
+            return getRemainingCount() > 0;
+        }
+
+        // IndexedDB
+        const DB_NAME = 'MapAlbumDB';
+        const DB_VERSION = 2;
+        const STORE_NAME = 'memos';
+        let db;
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) {
+                    reject(new Error('IndexedDB is not supported in this browser'));
+                    return;
+                }
+
+                let timeoutId;
+                const timeout = setTimeout(() => {
+                    reject(new Error('Database initialization timeout'));
+                }, 10000);
+
+                try {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                    request.onerror = () => {
+                        clearTimeout(timeout);
+                        console.error('IndexedDB open error:', request.error);
+                        reject(request.error || new Error('Failed to open database'));
+                    };
+                    
+                    request.onsuccess = () => {
+                        clearTimeout(timeout);
+                        db = request.result;
+                        console.log('Database opened successfully');
+                        console.log('Object stores:', Array.from(db.objectStoreNames));
+                        
+                        db.onversionchange = () => {
+                            db.close();
+                            alert('データベースが更新されました。ページを再読み込みしてください。\n\nDatabase was updated. Please reload the page.');
+                        };
+
+                        db.onerror = (event) => {
+                            console.error('Database error:', event.target.error);
+                        };
+                        
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            console.error('Object store not found, closing and recreating...');
+                            db.close();
+                            clearTimeout(timeout);
+                            
+                            const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+                            deleteRequest.onsuccess = () => {
+                                console.log('Database deleted, reinitializing...');
+                                initDB().then(resolve).catch(reject);
+                            };
+                            deleteRequest.onerror = () => {
+                                reject(new Error('Failed to delete corrupted database'));
+                            };
+                        } else {
+                            resolve(db);
+                        }
+                    };
+
+                    request.onupgradeneeded = (event) => {
+                        console.log('Upgrading database...');
+                        const db = event.target.result;
+                        
+                        try {
+                            if (db.objectStoreNames.contains(STORE_NAME)) {
+                                db.deleteObjectStore(STORE_NAME);
+                                console.log('Deleted existing object store');
+                            }
+                            
+                            const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                            objectStore.createIndex('date', 'date', { unique: false });
+                            objectStore.createIndex('location', 'location', { unique: false });
+                            console.log('Created new object store');
+                        } catch (upgradeError) {
+                            console.error('Upgrade error:', upgradeError);
+                            clearTimeout(timeout);
+                            reject(upgradeError);
+                        }
+                    };
+
+                    request.onblocked = () => {
+                        clearTimeout(timeout);
+                        console.warn('Database upgrade blocked. Please close other tabs with this app.');
+                        alert('他のタブでこのアプリが開かれています。閉じてから再度お試しください。\n\nThis app is open in another tab. Please close it and try again.');
+                        reject(new Error('Database blocked'));
+                    };
+                } catch (error) {
+                    clearTimeout(timeout);
+                    console.error('Fatal error in initDB:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        // Tab Switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.dataset.tab;
+                
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                button.classList.add('active');
+                document.getElementById(tabName + 'Tab').classList.add('active');
+
+                if (tabName === 'map') {
+                    setTimeout(() => {
+                        if (viewMap) {
+                            viewMap.invalidateSize();
+                        }
+                    }, 100);
+                }
+            });
+        });
+
+        // Maps
+        let viewMap;
+        let addMap;
+        let marker;
+        let selectedLocation = null;
+        let selectedPhotos = [];
+        let currentMemoId = null;
+
+        function initViewMap() {
+            viewMap = L.map('viewMap').setView([35.6762, 139.6503], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(viewMap);
+        }
+
+        function initAddMap() {
+            addMap = L.map('addMap').setView([35.6762, 139.6503], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(addMap);
+
+            addMap.on('click', (e) => {
+                if (marker) {
+                    addMap.removeLayer(marker);
+                }
+
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40]
+                });
+
+                marker = L.marker(e.latlng, { icon: customIcon }).addTo(addMap);
+                selectedLocation = e.latlng;
+            });
+        }
+
+        function loadMemosOnMap() {
+            if (!db || !viewMap) return;
+
+            viewMap.eachLayer(layer => {
+                if (layer instanceof L.Marker) {
+                    viewMap.removeLayer(layer);
+                }
+            });
+
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.getAll();
+
+            request.onsuccess = () => {
+                const memos = request.result;
+                const t = translations[currentLanguage];
+                
+                memos.forEach(memo => {
+                    const customIcon = L.divIcon({
+                        className: 'custom-marker',
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 40]
+                    });
+
+                    let thumbnailsHTML = '';
+                    if (memo.photos && memo.photos.length > 0) {
+                        const photosToShow = memo.photos.slice(0, 4);
+                        thumbnailsHTML = `
+                            <div class="popup-thumbnails">
+                                ${photosToShow.map((photo, index) => 
+                                    `<img src="${photo}" alt="Photo ${index + 1}" class="popup-thumbnail" onclick="window.open('${photo}', '_blank')">`
+                                ).join('')}
+                            </div>
+                        `;
+                    }
+
+                    const popupContent = `
+                        <div class="popup-header">${memo.locationName}</div>
+                        <div class="popup-body">
+                            <div class="popup-date">${new Date(memo.date).toLocaleDateString(currentLanguage === 'ja' ? 'ja-JP' : 'en-US')}</div>
+                            ${memo.memo ? `<div class="popup-text">${memo.memo.substring(0, 50)}${memo.memo.length > 50 ? '...' : ''}</div>` : ''}
+                            ${thumbnailsHTML}
+                            <button class="popup-btn" onclick="openMemoModal(${memo.id})">${t.detailBtn}</button>
+                        </div>
+                    `;
+
+                    L.marker([memo.lat, memo.lng], { icon: customIcon })
+                        .addTo(viewMap)
+                        .bindPopup(popupContent);
+                });
+            };
+        }
+
+        // Load Memos
+        function loadMemos() {
+            if (!db) return;
+            
+            const t = translations[currentLanguage];
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.getAll();
+
+            request.onsuccess = () => {
+                const memos = request.result.sort((a, b) => new Date(b.date) - new Date(a.date));
+                const memoList = document.getElementById('memoList');
+
+                if (memos.length === 0) {
+                    memoList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📍</div>
+                            <div class="empty-state-text">${t.emptyStateText}</div>
+                            <div class="empty-state-subtext">${t.emptyStateSubtext}</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                memoList.innerHTML = memos.map(memo => {
+                    let thumbnailsHTML = '';
+                    if (memo.photos && memo.photos.length > 0) {
+                        const photosToShow = memo.photos.slice(0, 4);
+                        thumbnailsHTML = `
+                            <div class="memo-thumbnails">
+                                ${photosToShow.map(photo => 
+                                    `<img src="${photo}" alt="Thumbnail" class="memo-thumbnail">`
+                                ).join('')}
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="memo-card" data-memo-id="${memo.id}" onclick="openMemoModal(${memo.id})">
+                            <div class="memo-card-header">
+                                <div>
+                                    <div class="memo-location">${memo.locationName}</div>
+                                    <div class="memo-date">${new Date(memo.date).toLocaleDateString(currentLanguage === 'ja' ? 'ja-JP' : 'en-US')}</div>
+                                </div>
+                            </div>
+                            ${memo.memo ? `<div class="memo-preview">${memo.memo}</div>` : ''}
+                            ${thumbnailsHTML}
+                            ${memo.photos && memo.photos.length > 0 ? `<span class="memo-photo-count">${memo.photos.length}${t.photoCount}</span>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            };
+        }
+
+        // Open/Close Memo Modal
+        function openMemoModal(memoId) {
+            if (!db) return;
+            
+            currentMemoId = memoId;
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.get(memoId);
+
+            request.onsuccess = () => {
+                const memo = request.result;
+                const t = translations[currentLanguage];
+                
+                document.getElementById('modalLocation').textContent = memo.locationName;
+                document.getElementById('modalDate').textContent = new Date(memo.date).toLocaleString(currentLanguage === 'ja' ? 'ja-JP' : 'en-US');
+                document.getElementById('modalMemo').textContent = memo.memo || '-';
+                
+                document.getElementById('detailDateLabel').textContent = t.dateLabel;
+                document.getElementById('detailMemoLabel').textContent = t.memoLabel;
+                document.getElementById('detailPhotoLabel').textContent = t.photoLabel2;
+                
+                const photosContainer = document.getElementById('modalPhotos');
+                if (memo.photos && memo.photos.length > 0) {
+                    photosContainer.innerHTML = memo.photos.map(photo => 
+                        `<img src="${photo}" alt="Photo" class="detail-photo" onclick="window.open('${photo}', '_blank')">`
+                    ).join('');
+                } else {
+                    photosContainer.innerHTML = `<div style="color: var(--gray-dark);">${t.noPhotos}</div>`;
+                }
+
+                document.getElementById('memoModal').classList.add('active');
+            };
+        }
+
+        function closeMemoModal() {
+            document.getElementById('memoModal').classList.remove('active');
+            currentMemoId = null;
+        }
+
+        // Delete Memo
+        function deleteMemo() {
+            const t = translations[currentLanguage];
+            if (!currentMemoId || !db) return;
+            
+            if (!confirm(t.deleteConfirm)) return;
+
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.delete(currentMemoId);
+
+            request.onsuccess = () => {
+                closeMemoModal();
+                loadMemos();
+                loadMemosOnMap();
+            };
+
+            request.onerror = () => {
+                alert(t.deleteError);
+            };
+        }
+
+        // Photo handling
+        async function handlePhotoSelect(event) {
+            const files = Array.from(event.target.files);
+            
+            for (const file of files) {
+                try {
+                    let fileToProcess = file;
+                    
+                    if (file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+                        console.log('Converting HEIC/HEIF to JPEG...');
+                        try {
+                            if (typeof heic2any === 'undefined') {
+                                alert('HEIC形式のサポートが利用できません。JPEGまたはPNG形式でお試しください。\n\nHEIC format is not supported. Please try JPEG or PNG format.');
+                                continue;
+                            }
+                            
+                            let convertedBlob = await heic2any({
+                                blob: file,
+                                toType: 'image/jpeg',
+                                quality: 0.8
+                            });
+                            
+                            if (Array.isArray(convertedBlob)) {
+                                convertedBlob = convertedBlob[0];
+                            }
+                            
+                            fileToProcess = new File([convertedBlob], file.name.replace(/\.heic$/i, '.jpg'), { type: 'image/jpeg' });
+                            console.log('HEIC conversion successful');
+                        } catch (heicError) {
+                            console.error('HEIC conversion failed:', heicError);
+                            alert('HEIC形式の変換に失敗しました。別の形式でお試しください。\n\nFailed to convert HEIC format. Please try another format.');
+                            continue;
+                        }
+                    }
+                    
+                    compressImage(fileToProcess, (compressedDataUrl) => {
+                        selectedPhotos.push(compressedDataUrl);
+                        renderPhotoPreview();
+                    });
+                } catch (error) {
+                    console.error('Error processing file:', file.name, error);
+                }
+            }
+            
+            event.target.value = '';
+        }
+
+        function compressImage(file, callback) {
+            try {
+                if (!file || !file.type) {
+                    console.error('Invalid file object');
+                    return;
+                }
+                
+                if (!file.type.match(/image.*/)) {
+                    console.error('Not an image file:', file.type);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onerror = (error) => {
+                    console.error('FileReader error:', error);
+                    console.warn('Skipping file due to read error');
+                };
+                reader.onload = (e) => {
+                    try {
+                        const img = new Image();
+                        img.onerror = (error) => {
+                            console.error('Image load error for file:', file.name, error);
+                            console.warn('Skipping file due to image load error');
+                        };
+                        img.onload = () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                
+                                if (!ctx) {
+                                    console.error('Failed to get canvas context');
+                                    return;
+                                }
+                                
+                                const maxSize = 1200;
+                                let width = img.width;
+                                let height = img.height;
+                                
+                                if (width === 0 || height === 0 || !isFinite(width) || !isFinite(height)) {
+                                    console.error('Invalid image dimensions:', width, height);
+                                    return;
+                                }
+                                
+                                if (width > height) {
+                                    if (width > maxSize) {
+                                        height = Math.round((height * maxSize) / width);
+                                        width = maxSize;
+                                    }
+                                } else {
+                                    if (height > maxSize) {
+                                        width = Math.round((width * maxSize) / height);
+                                        height = maxSize;
+                                    }
+                                }
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                
+                                ctx.fillStyle = '#FFFFFF';
+                                ctx.fillRect(0, 0, width, height);
+                                
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                                
+                                const sizeInMB = (compressedDataUrl.length * 0.75) / (1024 * 1024);
+                                if (sizeInMB > 5) {
+                                    console.warn('Compressed image still too large:', sizeInMB.toFixed(2), 'MB');
+                                    const furtherCompressed = canvas.toDataURL('image/jpeg', 0.5);
+                                    callback(furtherCompressed);
+                                } else {
+                                    callback(compressedDataUrl);
+                                }
+                            } catch (canvasError) {
+                                console.error('Canvas error:', canvasError);
+                                console.warn('Skipping file due to compression error');
+                            }
+                        };
+                        
+                        if (e.target && e.target.result) {
+                            img.src = e.target.result;
+                        } else {
+                            console.error('FileReader result is empty');
+                        }
+                    } catch (imgError) {
+                        console.error('Image processing error:', imgError);
+                    }
+                };
+                reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('compressImage fatal error:', error);
+            }
+        }
+
+        function renderPhotoPreview() {
+            const previewContainer = document.getElementById('photoPreview');
+            previewContainer.innerHTML = selectedPhotos.map((photo, index) => `
+                <div class="photo-preview-item">
+                    <img src="${photo}" alt="Preview ${index + 1}" class="photo-preview-img">
+                    <button type="button" class="photo-remove" onclick="removePhoto(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removePhoto(index) {
+            selectedPhotos.splice(index, 1);
+            renderPhotoPreview();
+        }
+// Save Memo
+        function saveMemo(event) {
+            event.preventDefault();
+            console.log('saveMemo called');
+            const t = translations[currentLanguage];
+
+            if (!selectedLocation) {
+                alert(t.selectLocation);
+                return;
+            }
+
+            if (!db) {
+                alert(t.saveFailed);
+                return;
+            }
+
+            const locationName = document.getElementById('locationName').value.trim();
+            const memoText = document.getElementById('memoText').value.trim();
+
+            const memo = {
+                locationName: locationName || (currentLanguage === 'ja' ? '名称未設定' : 'Untitled'),
+                memo: memoText,
+                lat: selectedLocation.lat,
+                lng: selectedLocation.lng,
+                photos: selectedPhotos.slice(),
+                date: new Date().toISOString()
+            };
+
+            console.log('Saving memo:', memo);
+
+            try {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(STORE_NAME);
+                const request = objectStore.add(memo);
+
+                request.onsuccess = () => {
+                    console.log('Memo saved successfully');
+                    incrementAddCount();
+                    closeAddModal();
+                    loadMemos();
+                    loadMemosOnMap();
+                };
+
+                request.onerror = (e) => {
+                    console.error('Save error:', e.target.error);
+                    alert(t.saveFailed + ': ' + e.target.error.message);
+                };
+
+                transaction.onerror = (e) => {
+                    console.error('Transaction error:', e.target.error);
+                    alert(t.saveFailed);
+                };
+            } catch (error) {
+                console.error('Exception in saveMemo:', error);
+                alert(t.saveFailed + ': ' + error.message);
+            }
+        }
+
+        // Add Button
+        document.getElementById('addBtn').addEventListener('click', () => {
+            const t = translations[currentLanguage];
+            
+            if (!canAddMemo()) {
+                alert(t.dailyLimitReached);
+                return;
+            }
+            
+            document.getElementById('addPhotoModal').classList.add('active');
+            setTimeout(() => {
+                if (!addMap) {
+                    initAddMap();
+                } else {
+                    addMap.invalidateSize();
+                }
+            }, 100);
+        });
+
+        function closeAddModal() {
+            document.getElementById('addPhotoModal').classList.remove('active');
+            document.getElementById('memoForm').reset();
+            document.getElementById('locationName').value = '';
+            document.getElementById('memoText').value = '';
+            selectedPhotos = [];
+            renderPhotoPreview();
+            if (marker && addMap) {
+                addMap.removeLayer(marker);
+                marker = null;
+            }
+            selectedLocation = null;
+        }
+
+        // Click outside modal to close
+        document.getElementById('memoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'memoModal') {
+                closeMemoModal();
+            }
+        });
+
+        document.getElementById('addPhotoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addPhotoModal') {
+                closeAddModal();
+            }
+        });
+
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'settingsModal') {
+                closeSettingsModal();
+            }
+        });
+
+        document.getElementById('privacyModal').addEventListener('click', (e) => {
+            if (e.target.id === 'privacyModal') {
+                closePrivacyModal();
+            }
+        });
+
+        document.getElementById('noticeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'noticeModal') {
+                closeNoticeModal();
+            }
+        });
+
+        document.getElementById('aboutModal').addEventListener('click', (e) => {
+            if (e.target.id === 'aboutModal') {
+                closeAboutModal();
+            }
+        });
+
+        // Settings
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            document.getElementById('settingsModal').classList.add('active');
+            loadSettings();
+        });
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').classList.remove('active');
+        }
+
+        function closeNoticeModal() {
+            document.getElementById('noticeModal').classList.remove('active');
+        }
+
+        function closeAboutModal() {
+            document.getElementById('aboutModal').classList.remove('active');
+        }
+
+        function showNotice() {
+            const modal = document.getElementById('noticeModal');
+            const content = document.getElementById('noticeContent');
+            const t = translations[currentLanguage];
+            
+            if (currentLanguage === 'ja') {
+                content.innerHTML = `
+                    <p>お知らせの内容は後日追加予定です。</p>
+                `;
+            } else {
+                content.innerHTML = `
+                    <p>Notice content will be added soon.</p>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function showAbout() {
+            const modal = document.getElementById('aboutModal');
+            const content = document.getElementById('aboutContent');
+            const t = translations[currentLanguage];
+            
+            if (currentLanguage === 'ja') {
+                content.innerHTML = `
+                    <p>Map Albumは、あなたの思い出を写真と地図で記録するシンプルなアプリです。旅行の思い出や日常の特別な瞬間を、場所と一緒に保存できます。</p>
+                    
+                    <p>このMap Albumを開発した目的としては、自分の撮った写真を自分だけの地図に載せたいからだ。すでに似ているサービスは存在しているが、他と違って僕が欲しいと思った会員登録不要、基本無料、使いやすさを重視している。これからも改善を続けていくつもりだ。</p>
+                    
+                    <p>ぜひ自分だけの思い出の地図を作って、楽しんで！！</p>
+                `;
+            } else {
+                content.innerHTML = `
+                    <p>Map Album is a simple app to record your memories with photos and maps. Save your travel memories and special daily moments together with locations.</p>
+                    
+                    <p>The purpose of developing Map Album is to put my own photos on my own map. There are already similar services out there, but unlike others, I focused on what I wanted: no registration required, basically free, and ease of use. I will continue to improve it.</p>
+                    
+                    <p>Create your own memory map and enjoy!!</p>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function showPrivacyPolicy() {
+            const modal = document.getElementById('privacyModal');
+            const content = document.getElementById('privacyContent');
+            const t = translations[currentLanguage];
+            
+            if (currentLanguage === 'ja') {
+                content.innerHTML = `
+                    <p style="text-align: center; margin-bottom: 1.5rem;">
+                        <a href="privacy.html" target="_blank" style="color: #0066cc; text-decoration: underline;">プライバシーポリシーを見る / Privacy Policy</a>
+                    </p>
+                    
+                    <h3>1. はじめに</h3>
+                    <p>本アプリ「Map Album」（以下「当アプリ」）は、ユーザーの皆様のプライバシーを尊重し、個人情報の保護に努めています。</p>
+                    
+                    <h3>2. 収集する情報</h3>
+                    <p>当アプリは以下の情報を収集する場合があります：</p>
+                    <ul>
+                        <li>ユーザーが追加した写真、メモ、位置情報</li>
+                        <li>アプリの使用状況に関する情報</li>
+                        <li>Google AdSenseによる広告配信のための情報（Cookie等）</li>
+                    </ul>
+                    
+                    <h3>3. 情報の使用目的</h3>
+                    <p>収集した情報は以下の目的で使用されます：</p>
+                    <ul>
+                        <li>アプリ機能の提供（思い出の記録と表示）</li>
+                        <li>アプリの改善と機能追加</li>
+                        <li>Google AdSenseによる広告配信の最適化</li>
+                    </ul>
+                    
+                    <h3>4. データの保存</h3>
+                    <p>ユーザーが追加したすべてのデータ（写真、メモ、位置情報）は、デバイスのローカルストレージ（IndexedDB）にのみ保存されます。当アプリの開発者や第三者のサーバーには一切送信されません。</p>
+                    
+                    <h3>5. Google AdSenseについて</h3>
+                    <p>当アプリではGoogle AdSenseを使用して広告を配信しています。Google AdSenseは、Cookieを使用してユーザーの興味に基づいた広告を表示します。Cookieを使用した広告配信を無効にする場合は、Googleの広告設定ページで設定を変更できます。</p>
+                    <p>詳細については、<a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener noreferrer">Googleの広告ポリシー</a>をご確認ください。</p>
+                    
+                    <h3>6. データの第三者提供</h3>
+                    <p>ユーザーの個人データを第三者に販売、共有、または提供することはありません。ただし、Google AdSenseによる広告配信のために必要な範囲で、Googleにデータが送信される場合があります。</p>
+                    
+                    <h3>7. データの削除</h3>
+                    <p>ユーザーは、アプリの設定画面からいつでもすべてのデータを削除できます。データを削除すると、デバイスから完全に削除され、復元することはできません。</p>
+                    
+                    <h3>8. セキュリティ</h3>
+                    <p>ユーザーデータはデバイス上でのみ保存されるため、デバイスのセキュリティ設定によって保護されます。デバイスの紛失や盗難にはご注意ください。</p>
+                    
+                    <h3>9. プライバシーポリシーの変更</h3>
+                    <p>本プライバシーポリシーは、必要に応じて変更されることがあります。重要な変更がある場合は、アプリ内でお知らせします。</p>
+                    
+                    <h3>10. お問い合わせ</h3>
+                    <p>本プライバシーポリシーに関するご質問やご意見は、アプリ内のフィードバックフォームからお送りください。</p>
+                    
+                    <p><small>最終更新日: 2026年2月</small></p>
+                `;
+            } else {
+                content.innerHTML = `
+                    <p style="text-align: center; margin-bottom: 1.5rem;">
+                        <a href="privacy.html" target="_blank" style="color: #0066cc; text-decoration: underline;">プライバシーポリシーを見る / Privacy Policy</a>
+                    </p>
+                    
+                    <h3>1. Introduction</h3>
+                    <p>This app "Map Album" (hereinafter "the App") respects the privacy of users and is committed to protecting personal information.</p>
+                    
+                    <h3>2. Information We Collect</h3>
+                    <p>The App may collect the following information:</p>
+                    <ul>
+                        <li>Photos, memos, and location information added by users</li>
+                        <li>Information about app usage</li>
+                        <li>Information for ad delivery by Google AdSense (Cookies, etc.)</li>
+                    </ul>
+                    
+                    <h3>3. Purpose of Use</h3>
+                    <p>Collected information is used for the following purposes:</p>
+                    <ul>
+                        <li>Providing app functionality (recording and displaying memories)</li>
+                        <li>Improving the app and adding features</li>
+                        <li>Optimizing ad delivery by Google AdSense</li>
+                    </ul>
+                    
+                    <h3>4. Data Storage</h3>
+                    <p>All user-added data (photos, memos, location information) is stored only in the device's local storage (IndexedDB). It is never sent to the app developer's or any third-party servers.</p>
+                    
+                    <h3>5. About Google AdSense</h3>
+                    <p>The App uses Google AdSense to deliver advertisements. Google AdSense uses Cookies to display ads based on user interests. If you want to disable cookie-based ad delivery, you can change settings on Google's ad settings page.</p>
+                    <p>For more details, please see <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">Google's Advertising Policies</a>.</p>
+                    
+                    <h3>6. Data Sharing with Third Parties</h3>
+                    <p>We do not sell, share, or provide user personal data to third parties. However, data may be sent to Google as necessary for ad delivery by Google AdSense.</p>
+                    
+                    <h3>7. Data Deletion</h3>
+                    <p>Users can delete all data at any time from the app's settings screen. Once deleted, data is completely removed from the device and cannot be recovered.</p>
+                    
+                    <h3>8. Security</h3>
+                    <p>User data is stored only on the device and is protected by device security settings. Please be careful about device loss or theft.</p>
+                    
+                    <h3>9. Privacy Policy Changes</h3>
+                    <p>This Privacy Policy may be changed as necessary. If there are significant changes, we will notify you within the app.</p>
+                    
+                    <h3>10. Contact</h3>
+                    <p>For questions or comments regarding this Privacy Policy, please send them through the in-app feedback form.</p>
+                    
+                    <p><small>Last Updated: February 2026</small></p>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function loadSettings() {
+            const savedLanguage = localStorage.getItem('language') || 'ja';
+            document.getElementById('languageSelect').value = savedLanguage;
+        }
+
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            const language = e.target.value;
+            localStorage.setItem('language', language);
+            applyLanguage(language);
+        });
+
+        function applyLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            document.querySelector('.header h1').textContent = t.appTitle;
+            document.querySelector('.header-subtitle').textContent = t.appSubtitle;
+            
+            document.querySelectorAll('.tab-button')[0].textContent = t.tabList;
+            document.querySelectorAll('.tab-button')[1].textContent = t.tabMap;
+            
+            const emptyStateText = document.getElementById('emptyStateText');
+            const emptyStateSubtext = document.getElementById('emptyStateSubtext');
+            if (emptyStateText) emptyStateText.textContent = t.emptyStateText;
+            if (emptyStateSubtext) emptyStateSubtext.textContent = t.emptyStateSubtext;
+            
+            document.querySelector('#addPhotoModal .modal-header h2').textContent = t.addPhotoTitle;
+            document.querySelector('.map-instructions').textContent = t.mapInstruction;
+            document.getElementById('mapSelectLabel').textContent = t.mapSelectLabel;
+            document.getElementById('locationNameFormLabel').textContent = t.locationNameLabel;
+            document.getElementById('locationName').placeholder = t.locationNamePlaceholder;
+            document.getElementById('memoFormLabel').textContent = t.memoLabel;
+            document.getElementById('memoText').placeholder = t.memoPlaceholder;
+            document.getElementById('photoFormLabel').textContent = t.photoLabel;
+            document.getElementById('photoUploadText').textContent = t.photoUploadText;
+            document.getElementById('saveButton').textContent = t.saveBtn;
+            
+            document.querySelector('.btn-delete').textContent = t.deleteBtn;
+            
+            document.querySelector('#settingsModalTitle').textContent = t.settingsModalTitle || t.settingsTitle;
+            document.getElementById('settingsVersionTitle').textContent = t.versionTitle;
+            document.getElementById('settingsNoticeTitle').textContent = t.noticeTitle;
+            document.getElementById('settingsNoticeButton').textContent = t.noticeButton;
+            document.getElementById('settingsLanguageTitle').textContent = t.languageTitle;
+            document.getElementById('settingsHowToTitle').textContent = t.howToTitle;
+            document.getElementById('settingsHowToText').innerHTML = t.howToText;
+            document.getElementById('settingsPrivacyTitle').textContent = t.privacyTitle;
+            document.getElementById('settingsPrivacyButton').textContent = t.privacyButton;
+            document.getElementById('settingsAboutTitle').textContent = t.aboutTitle;
+            document.getElementById('settingsAboutButton').textContent = t.aboutButton;
+            document.getElementById('settingsDataTitle').textContent = t.dataManagementTitle;
+            document.getElementById('exportDataButton').textContent = t.exportData;
+            document.getElementById('importDataButton').textContent = t.importData;
+            document.getElementById('clearDataButton').textContent = t.clearDataBtn;
+            document.getElementById('resetDatabaseButton').textContent = t.resetDatabaseBtn;
+            document.getElementById('settingsFeedbackTitle').textContent = t.feedbackTitle;
+            document.getElementById('settingsFeedbackButton').textContent = t.feedbackButton;
+            document.getElementById('settingsLibrariesTitle').textContent = t.librariesTitle;
+            
+            document.getElementById('privacyModalTitle').textContent = t.privacyModalTitle;
+            document.getElementById('noticeModalTitle').textContent = t.noticeModalTitle;
+            document.getElementById('aboutModalTitle').textContent = t.aboutModalTitle;
+            
+            loadMemos();
+            loadMemosOnMap();
+        }
+
+        function clearAllData() {
+            const t = translations[currentLanguage];
+            if (!confirm(t.clearAllConfirm1)) return;
+            
+            if (!confirm(t.clearAllConfirm2)) return;
+
+            if (!db) {
+                alert(t.deleteError);
+                return;
+            }
+
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.clear();
+
+            request.onsuccess = () => {
+                alert(t.dataCleared);
+                closeSettingsModal();
+                loadMemos();
+                loadMemosOnMap();
+            };
+
+            request.onerror = () => {
+                alert(t.deleteError);
+            };
+        }
+
+        function resetDatabase() {
+            const t = translations[currentLanguage];
+            if (!confirm('データベースを完全にリセットします。すべてのデータが削除されます。よろしいですか？\n\nReset database completely. All data will be deleted. Are you sure?')) {
+                return;
+            }
+
+            if (db) {
+                db.close();
+            }
+
+            const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+            
+            deleteRequest.onsuccess = () => {
+                alert('データベースをリセットしました。ページを再読み込みします。\n\nDatabase reset. Reloading page...');
+                location.reload();
+            };
+
+            deleteRequest.onerror = () => {
+                alert('リセットに失敗しました。\n\nFailed to reset database.');
+            };
+
+            deleteRequest.onblocked = () => {
+                alert('他のタブでこのアプリが開かれています。閉じてから再度お試しください。\n\nThis app is open in another tab. Please close it and try again.');
+            };
+        }
+
+        async function exportData() {
+            const t = translations[currentLanguage];
+            
+            if (!db) {
+                alert(t.saveFailed);
+                return;
+            }
+
+            try {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const objectStore = transaction.objectStore(STORE_NAME);
+                const request = objectStore.getAll();
+
+                request.onsuccess = () => {
+                    const memos = request.result;
+                    const exportData = {
+                        version: '1.0.0',
+                        exportDate: new Date().toISOString(),
+                        memos: memos
+                    };
+
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `map-album-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+
+                    alert(t.exportSuccess);
+                };
+
+                request.onerror = () => {
+                    alert(t.saveFailed);
+                };
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(t.saveFailed);
+            }
+        }
+
+        async function importData(event) {
+            const t = translations[currentLanguage];
+            const file = event.target.files[0];
+            
+            if (!file) return;
+
+            if (!confirm(t.importConfirm)) {
+                event.target.value = '';
+                return;
+            }
+
+            try {
+                const text = await file.text();
+                const importData = JSON.parse(text);
+
+                if (!importData.memos || !Array.isArray(importData.memos)) {
+                    throw new Error('Invalid data format');
+                }
+
+                if (!db) {
+                    alert(t.importFailed);
+                    event.target.value = '';
+                    return;
+                }
+
+                const clearTransaction = db.transaction([STORE_NAME], 'readwrite');
+                const clearStore = clearTransaction.objectStore(STORE_NAME);
+                await new Promise((resolve, reject) => {
+                    const clearRequest = clearStore.clear();
+                    clearRequest.onsuccess = resolve;
+                    clearRequest.onerror = reject;
+                });
+
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(STORE_NAME);
+
+                for (const memo of importData.memos) {
+                    const { id, ...memoWithoutId } = memo;
+                    objectStore.add(memoWithoutId);
+                }
+
+                transaction.oncomplete = () => {
+                    alert(t.importSuccess);
+                    loadMemos();
+                    loadMemosOnMap();
+                    closeSettingsModal();
+                    event.target.value = '';
+                };
+
+                transaction.onerror = () => {
+                    alert(t.importFailed);
+                    event.target.value = '';
+                };
+            } catch (error) {
+                console.error('Import error:', error);
+                alert(t.importFailed + ': ' + error.message);
+                event.target.value = '';
+            }
+        }
+
+        // Initialize
+        (async () => {
+            try {
+                console.log('Initializing app...');
+                await initDB();
+                console.log('Database initialized:', db);
+                initViewMap();
+                console.log('View map initialized');
+                loadMemos();
+                loadMemosOnMap();
+                applyLanguage(currentLanguage);
+                updateFabBadge();
+                console.log('App initialization complete');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('アプリの初期化に失敗しました / App initialization failed: ' + error.message);
+            }
+        })();
+    </script>
+</body>
+</html>
